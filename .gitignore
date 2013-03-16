@@ -4,3 +4,14 @@
 *.jar
 *.war
 *.ear
+
+#IDE stuff
+.classpath
+.project
+.settings/
+.idea/
+*.iml
+*.iws
+.DS_Store
+log/
+target/
