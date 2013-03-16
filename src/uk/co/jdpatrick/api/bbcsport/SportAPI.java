@@ -91,7 +91,10 @@ public class SportAPI {
                     last = "";
                     String[] scoreSplit = score.split(" ");
                     String scoreFormatted = scoreSplit[0] + "-" + scoreSplit[1];
-                    fixtures.add(new Fixture(home, away, scoreFormatted,FixtureState.LIVE));
+                    Fixture fixture = new Fixture(home, away, scoreFormatted,FixtureState.LIVE);
+                    ArrayList<Event> events = this.loadEvents(el);
+                    fixture.setEvents(events);
+                    fixtures.add(fixture);
                 }
             }
         }
@@ -121,7 +124,10 @@ public class SportAPI {
                     last = "";
                     String[] scoreSplit = score.split(" ");
                     String scoreFormatted = scoreSplit[0] + "-" + scoreSplit[1];
-                    fixtures.add(new Fixture(home, away, scoreFormatted,FixtureState.HALFTIME));
+                    Fixture fixture =new Fixture(home, away, scoreFormatted,FixtureState.HALFTIME);
+                    ArrayList<Event> events = this.loadEvents(el);
+                    fixture.setEvents(events);
+                    fixtures.add(fixture);
                 }
             }
         }
@@ -151,11 +157,34 @@ public class SportAPI {
                     last = "";
                     String[] scoreSplit = score.split(" ");
                     String scoreFormatted = scoreSplit[0] + "-" + scoreSplit[1];
-                    fixtures.add(new Fixture(home, away, scoreFormatted,FixtureState.FULLTIME));
+                    Fixture fixture = new Fixture(home, away, scoreFormatted,FixtureState.FULLTIME);
+                    ArrayList<Event> events = this.loadEvents(el);
+                    fixture.setEvents(events);
+                    fixtures.add(fixture);
                 }
             }
         }
         return fixtures;
     }
 
+
+    private ArrayList<Event> loadEvents(Element fixture){
+        Element info = fixture.getElementsByClass("info").get(0);
+        Elements eventLi = info.getElementsByTag("li");
+        ArrayList<Event> events = new ArrayList<Event>();
+        for(Element e : eventLi){
+            String team = e.getElementsByClass("visually-hidden").get(0).text();
+            String event = e.getElementsByClass("spr-football").get(0).text();
+            String[] classSplit =e.getElementsByClass("spr-football").get(0).className().split(" ");
+            String bbcEvent = classSplit[classSplit.length-1];
+            String[] pinfo = e.getElementsByClass("player").get(0).text().split(" ");
+            String name = pinfo[0];
+            String time = "";
+            for(int i = 1;i!= pinfo.length;i++){
+                time+=pinfo[i];
+            }
+            events.add(new Event(EventType.getFromBBCName(bbcEvent),time,name,team));
+        }
+        return events;
+    }
 }
