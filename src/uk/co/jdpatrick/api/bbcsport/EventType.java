@@ -20,8 +20,6 @@ public enum EventType {
             type = EventType.GOAL;
         else if (name.contains("dismissal"))
             type = EventType.REDCARD;
-        else
-        type = EventType.YELLOWCARD;
          return type;
 
     }
