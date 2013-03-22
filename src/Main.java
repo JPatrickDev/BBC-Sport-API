@@ -17,5 +17,6 @@ public class Main {
         for(Fixture f : fixtures){
             System.out.println(f);
         }
+
     }
 }

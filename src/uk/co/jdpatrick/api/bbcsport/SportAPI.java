@@ -6,6 +6,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,10 +18,10 @@ import java.util.logging.Logger;
 public class SportAPI {
     private String league;
     private String URL;
-
     public SportAPI() {
         this("football");
     }
+
 
     Logger log = Logger.getLogger(SportAPI.class.getName());
 
@@ -31,12 +32,13 @@ public class SportAPI {
         } else {
             this.URL = "http://m.bbc.co.uk/sport/football/" + league + "/live-scores";
         }
+
         log.log(Level.INFO, "New SportAPI object created, using league " + league);
     }
 
     public ArrayList<Fixture> getFixtures(boolean liveOnly) throws IOException {
         ArrayList<Fixture> fixtures = new ArrayList<Fixture>();
-        Document doc = Jsoup.parse(new java.net.URL(URL), 1000);
+        Document doc = Jsoup.parse(new java.net.URL(URL), 5000);
         fixtures.addAll(getLiveMatches(doc));
         fixtures.addAll(getHalfTimeMatches(doc));
         if(!liveOnly)
@@ -54,13 +56,16 @@ public class SportAPI {
                         Elements abbr = club.getElementsByTag("span");
                         text = abbr.text();
                     }
+                    String ko = el.getElementsByClass("ko").text();
                     if (last.equalsIgnoreCase("")) {
                         last = text;
                     } else {
                         String home = last;
                         String away = text;
                         last = "";
-                        fixtures.add(new Fixture(home, away, "0-0",FixtureState.FIXTURE));
+                        Fixture fix = new Fixture(home, away, "0-0",FixtureState.FIXTURE);
+                        fix.setKo(ko);
+                        fixtures.add(fix);
                     }
                 }
             }
@@ -128,15 +133,15 @@ public class SportAPI {
                     ArrayList<Event> events = this.loadEvents(el);
                     fixture.setEvents(events);
                     fixtures.add(fixture);
-                }
-            }
-        }
-        return fixtures;
     }
+}
+}
+        return fixtures;
+}
 
-    private ArrayList<Fixture> getFullTimeMatches(Document doc){
+private ArrayList<Fixture> getFullTimeMatches(Document doc){
         ArrayList<Fixture> fixtures = new ArrayList<Fixture>();
-        Elements e = doc.getElementsByClass("type-result");
+Elements e = doc.getElementsByClass("type-result");
         String last = "";
         for (Element el : e) {
             Elements clubs = el.getElementsByClass("club");
@@ -169,6 +174,7 @@ public class SportAPI {
 
 
     private ArrayList<Event> loadEvents(Element fixture){
+        try{
         Element info = fixture.getElementsByClass("info").get(0);
         Elements eventLi = info.getElementsByTag("li");
         ArrayList<Event> events = new ArrayList<Event>();
@@ -186,5 +192,7 @@ public class SportAPI {
             events.add(new Event(EventType.getFromBBCName(bbcEvent),time,name,team));
         }
         return events;
+        }catch(Exception ex){return new ArrayList<Event>();}
     }
+
 }

@@ -13,6 +13,8 @@ public class Fixture {
     String score;
     FixtureState state;
     ArrayList<Event> events = new ArrayList<Event>();
+    private String ko;
+
     public Fixture(String home,String away,String score,FixtureState state){
         this.home = home;
         this.away = away;
@@ -66,6 +68,19 @@ public class Fixture {
         for(Event e: this.getEvents()){
             str += e.toString();
         }
+        if(getState() == FixtureState.FIXTURE)
+            str += ".." + getKo();
         return str;
+    }
+
+    public String getKo() {
+        if(this.getState() == FixtureState.FIXTURE)
+        return ko;
+        else
+            return "Game started";
+    }
+
+    public void setKo(String ko) {
+        this.ko = ko;
     }
 }
