@@ -14,10 +14,12 @@ import java.util.logging.Logger;
 /**
  * Author: Jack
  * Date: 16/03/13
+ * Last updated: 10/11/2017
  */
 public class SportAPI {
     private String league;
     private String URL;
+
     public SportAPI() {
         this("football");
     }
@@ -34,165 +36,61 @@ public class SportAPI {
         }
 
         log.log(Level.INFO, "New SportAPI object created, using league " + league);
+        log.log(Level.INFO, this.URL);
     }
 
     public ArrayList<Fixture> getFixtures(boolean liveOnly) throws IOException {
         ArrayList<Fixture> fixtures = new ArrayList<Fixture>();
         Document doc = Jsoup.parse(new java.net.URL(URL), 5000);
-        fixtures.addAll(getLiveMatches(doc));
-        fixtures.addAll(getHalfTimeMatches(doc));
-        if(!liveOnly)
-        fixtures.addAll(getFullTimeMatches(doc));
-        if(!liveOnly){
-            Elements e = doc.getElementsByClass("type-fixture");
-            String last = "";
-            for (Element el : e) {
-                Elements clubs = el.getElementsByClass("club");
-                for (Element club : clubs) {
-                    String text = "";
-                    if (!club.tagName().equalsIgnoreCase("abbr")) {
-                        text = club.text();
-                    } else {
-                        Elements abbr = club.getElementsByTag("span");
-                        text = abbr.text();
-                    }
-                    String ko = el.getElementsByClass("ko").text();
-                    if (last.equalsIgnoreCase("")) {
-                        last = text;
-                    } else {
-                        String home = last;
-                        String away = text;
-                        last = "";
-                        Fixture fix = new Fixture(home, away, "0-0",FixtureState.FIXTURE);
-                        fix.setKo(ko);
-                        fixtures.add(fix);
-                    }
-                }
-            }
-        }
-        return fixtures;
-    }
-
-    private ArrayList<Fixture> getLiveMatches(Document doc){
-    ArrayList<Fixture> fixtures = new ArrayList<Fixture>();
-        Elements e = doc.getElementsByClass("type-live");
+        Elements e = doc.getElementsByClass("gs-o-list-ui__item");
         String last = "";
         for (Element el : e) {
-            Elements clubs = el.getElementsByClass("club");
-            for (Element club : clubs) {
-                String text = "";
-                String score = el.getElementsByClass("score").text();
-                if (!club.tagName().equalsIgnoreCase("abbr")) {
-                    text = club.text();
-                } else {
-                    Elements abbr = club.getElementsByTag("span");
-                    text = abbr.text();
-                }
-                if (last.equalsIgnoreCase("")) {
-                    last = text;
-                } else {
-                    String home = last;
-                    String away = text;
-                    last = "";
-                    String[] scoreSplit = score.split(" ");
-                    String scoreFormatted = scoreSplit[0] + "-" + scoreSplit[1];
-                    Fixture fixture = new Fixture(home, away, scoreFormatted,FixtureState.LIVE);
-                    ArrayList<Event> events = this.loadEvents(el);
-                    fixture.setEvents(events);
-                    fixtures.add(fixture);
-                }
-            }
-        }
-        return fixtures;
-    }
+            Elements clubs = el.getElementsByClass("sp-c-fixture__team-name-trunc");
+            Elements names = clubs.select("abbr");
+            String home = names.get(0).text();
+            String away = names.get(1).text();
 
-    private ArrayList<Fixture> getHalfTimeMatches(Document doc){
-        ArrayList<Fixture> fixtures = new ArrayList<Fixture>();
-        Elements e = doc.getElementsByClass("type-halftime");
-        String last = "";
-        for (Element el : e) {
-            Elements clubs = el.getElementsByClass("club");
-            for (Element club : clubs) {
-                String text = "";
-                String score = el.getElementsByClass("score").text();
-                if (!club.tagName().equalsIgnoreCase("abbr")) {
-                    text = club.text();
-                } else {
-                    Elements abbr = club.getElementsByTag("span");
-                    text = abbr.text();
-                }
-                if (last.equalsIgnoreCase("")) {
-                    last = text;
-                } else {
-                    String home = last;
-                    String away = text;
-                    last = "";
-                    String[] scoreSplit = score.split(" ");
-                    String scoreFormatted = scoreSplit[0] + "-" + scoreSplit[1];
-                    Fixture fixture =new Fixture(home, away, scoreFormatted,FixtureState.HALFTIME);
-                    ArrayList<Event> events = this.loadEvents(el);
-                    fixture.setEvents(events);
-                    fixtures.add(fixture);
-    }
-}
-}
-        return fixtures;
-}
-
-private ArrayList<Fixture> getFullTimeMatches(Document doc){
-        ArrayList<Fixture> fixtures = new ArrayList<Fixture>();
-Elements e = doc.getElementsByClass("type-result");
-        String last = "";
-        for (Element el : e) {
-            Elements clubs = el.getElementsByClass("club");
-            for (Element club : clubs) {
-                String text = "";
-                String score = el.getElementsByClass("score").text();
-                if (!club.tagName().equalsIgnoreCase("abbr")) {
-                    text = club.text();
-                } else {
-                    Elements abbr = club.getElementsByTag("span");
-                    text = abbr.text();
-                }
-                if (last.equalsIgnoreCase("")) {
-                    last = text;
-                } else {
-                    String home = last;
-                    String away = text;
-                    last = "";
-                    String[] scoreSplit = score.split(" ");
-                    String scoreFormatted = scoreSplit[0] + "-" + scoreSplit[1];
-                    Fixture fixture = new Fixture(home, away, scoreFormatted,FixtureState.FULLTIME);
-                    ArrayList<Event> events = this.loadEvents(el);
-                    fixture.setEvents(events);
-                    fixtures.add(fixture);
-                }
-            }
-        }
-        return fixtures;
-    }
-
-
-    private ArrayList<Event> loadEvents(Element fixture){
-        try{
-        Element info = fixture.getElementsByClass("info").get(0);
-        Elements eventLi = info.getElementsByTag("li");
-        ArrayList<Event> events = new ArrayList<Event>();
-        for(Element e : eventLi){
-            String team = e.getElementsByClass("visually-hidden").get(0).text();
-            String event = e.getElementsByClass("spr-football").get(0).text();
-            String[] classSplit =e.getElementsByClass("spr-football").get(0).className().split(" ");
-            String bbcEvent = classSplit[classSplit.length-1];
-            String[] pinfo = e.getElementsByClass("player").get(0).text().split(" ");
-            String name = pinfo[0];
+            Elements score = el.getElementsByClass("sp-c-fixture__number");
+            String KO = "";
+            String homeScore = "0";
+            String awayScore = "";
             String time = "";
-            for(int i = 1;i!= pinfo.length;i++){
-                time+=pinfo[i];
+            if (score.size() == 1) {
+                KO = score.get(0).text();
+            } else {
+                homeScore = score.get(0).text();
+                awayScore = score.get(1).text();
+                Elements status = el.getElementsByClass("sp-c-fixture__status");
+                String statusString = status.get(0).getElementsByTag("abbr").text();
+                if (statusString.equalsIgnoreCase("")) {
+                    //  System.out.println("Live game");
+                    Elements elmt = status.get(0).getElementsByTag("span");
+                    for (Element child : elmt) {
+                        if (!child.text().equals("")) {
+                            time = child.text();
+                            break;
+                        }
+                    }
+                } else {
+                    time = statusString;
+                }
+                FixtureState state = FixtureState.LIVE;
+                if (time.equalsIgnoreCase("HT")) {
+                    state = FixtureState.HALFTIME;
+                } else if (time.equalsIgnoreCase("FT")) {
+                    state = FixtureState.FULLTIME;
+                }
+                if (!KO.equalsIgnoreCase("")) {
+                    state = FixtureState.FIXTURE;
+                }
+                Fixture f = new Fixture(home, away, homeScore + "-" + awayScore, state);
+                f.setKo(KO);
+                fixtures.add(f);
             }
-            events.add(new Event(EventType.getFromBBCName(bbcEvent),time,name,team));
         }
-        return events;
-        }catch(Exception ex){return new ArrayList<Event>();}
+
+        return fixtures;
     }
+
 
 }
