@@ -13,7 +13,7 @@ public class FootballFixture extends FootballMatch {
     private String ko;
 
     public FootballFixture(String home, String away, String ko) {
-        super(home, away);
+        super(home, away, FixtureState.FIXTURE);
         this.ko = ko;
     }
 
@@ -23,5 +23,12 @@ public class FootballFixture extends FootballMatch {
 
     public void setKo(String ko) {
         this.ko = ko;
+    }
+
+    @Override
+    public String toString() {
+        return "FootballFixture{" +
+                "ko='" + ko + '\'' +
+                '}' + super.toString();
     }
 }

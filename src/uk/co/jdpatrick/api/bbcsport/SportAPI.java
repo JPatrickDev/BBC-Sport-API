@@ -4,10 +4,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import uk.co.jdpatrick.api.bbcsport.Models.FixtureState;
-import uk.co.jdpatrick.api.bbcsport.Models.FootballFixture;
-import uk.co.jdpatrick.api.bbcsport.Models.FootballMatch;
-import uk.co.jdpatrick.api.bbcsport.Models.LiveMatch;
+import uk.co.jdpatrick.api.bbcsport.Models.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,12 +52,12 @@ public class SportAPI {
 
             Elements score = el.getElementsByClass("sp-c-fixture__number");
             String KO = "";
-            String homeScore = "0";
+            String homeScore = "";
             String awayScore = "";
             String time = "";
             if (score.size() == 1) {
                 KO = score.get(0).text();
-                FootballFixture fixture = new FootballFixture(home,away,time);
+                FootballFixture fixture = new FootballFixture(home,away,KO);
                 fixtures.add(fixture);
             } else {
                 homeScore = score.get(0).text();
@@ -79,17 +76,15 @@ public class SportAPI {
                 } else {
                     time = statusString;
                 }
-                FixtureState state = FixtureState.LIVE;
+                FootballMatch match = null;
                 if (time.equalsIgnoreCase("HT")) {
-                    state = FixtureState.HALFTIME;
+                    match = new HalfTimeMatch(home, away, homeScore + "-" + awayScore);
                 } else if (time.equalsIgnoreCase("FT")) {
-                    state = FixtureState.FULLTIME;
+                    match = new FinishedMatch(home, away, homeScore + "-" + awayScore);
+                }else{
+                    match = new LiveMatch(home, away, homeScore + "-" + awayScore);
                 }
-                if (!KO.equalsIgnoreCase("")) {
-                    state = FixtureState.FIXTURE;
-                }
-                LiveMatch f = new LiveMatch(home, away, homeScore + "-" + awayScore);
-                fixtures.add(f);
+                fixtures.add(match);
             }
         }
 

@@ -14,7 +14,7 @@ public class LiveMatch extends FootballMatch {
     ArrayList<Event> events = new ArrayList<Event>();
 
     public LiveMatch(String home, String away, String score) {
-        super(home, away);
+        super(home, away, FixtureState.LIVE);
         this.score = score;
 
     }
@@ -41,6 +41,6 @@ public class LiveMatch extends FootballMatch {
         return "LiveMatch{" +
                 "score='" + score + '\'' +
                 ", events=" + events +
-                '}';
+                '}' + super.toString();
     }
 }
