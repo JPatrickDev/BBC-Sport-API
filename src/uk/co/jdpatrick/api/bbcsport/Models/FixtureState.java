@@ -1,4 +1,4 @@
-package uk.co.jdpatrick.api.bbcsport;
+package uk.co.jdpatrick.api.bbcsport.Models;
 
 /**
  * Author: Jack
@@ -8,7 +8,7 @@ public enum FixtureState {
 
     FIXTURE("Not started"),LIVE("Latest"),HALFTIME("Half Time"),FULLTIME("Full Time");
 
-    String name;
+    public String name;
     FixtureState(String name){
         this.name = name;
     }

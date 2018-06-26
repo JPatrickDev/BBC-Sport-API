@@ -4,9 +4,12 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import uk.co.jdpatrick.api.bbcsport.Models.FixtureState;
+import uk.co.jdpatrick.api.bbcsport.Models.FootballFixture;
+import uk.co.jdpatrick.api.bbcsport.Models.FootballMatch;
+import uk.co.jdpatrick.api.bbcsport.Models.LiveMatch;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,8 +42,8 @@ public class SportAPI {
         log.log(Level.INFO, this.URL);
     }
 
-    public ArrayList<Fixture> getFixtures(boolean liveOnly) throws IOException {
-        ArrayList<Fixture> fixtures = new ArrayList<Fixture>();
+    public ArrayList<FootballMatch> getFixtures(boolean liveOnly) throws IOException {
+        ArrayList<FootballMatch> fixtures = new ArrayList<FootballMatch>();
         Document doc = Jsoup.parse(new java.net.URL(URL), 5000);
         Elements e = doc.getElementsByClass("gs-o-list-ui__item");
         String last = "";
@@ -57,6 +60,8 @@ public class SportAPI {
             String time = "";
             if (score.size() == 1) {
                 KO = score.get(0).text();
+                FootballFixture fixture = new FootballFixture(home,away,time);
+                fixtures.add(fixture);
             } else {
                 homeScore = score.get(0).text();
                 awayScore = score.get(1).text();
@@ -83,8 +88,7 @@ public class SportAPI {
                 if (!KO.equalsIgnoreCase("")) {
                     state = FixtureState.FIXTURE;
                 }
-                Fixture f = new Fixture(home, away, homeScore + "-" + awayScore, state);
-                f.setKo(KO);
+                LiveMatch f = new LiveMatch(home, away, homeScore + "-" + awayScore);
                 fixtures.add(f);
             }
         }
