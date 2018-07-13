@@ -1,12 +1,18 @@
 package uk.co.jdpatrick.api.bbcsport;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import uk.co.jdpatrick.api.bbcsport.Models.*;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class SportAPI {
     private String league;
-    private String URL;
+    private String url;
 
     public SportAPI() {
         this("football");
@@ -30,18 +36,18 @@ public class SportAPI {
     public SportAPI(String league) {
         this.league = league;
         if (league.equalsIgnoreCase("football")) {
-            this.URL = "http://m.bbc.co.uk/sport/football/live-scores";
+            this.url = "https://www.bbc.co.uk/sport/football/scores-fixtures";
         } else {
-            this.URL = "http://m.bbc.co.uk/sport/football/" + league + "/live-scores";
+            this.url = "https://www.bbc.co.uk/sport/football/" + league + "/scores-fixtures";
         }
 
         log.log(Level.INFO, "New SportAPI object created, using league " + league);
-        log.log(Level.INFO, this.URL);
+        log.log(Level.INFO, this.url);
     }
 
     public ArrayList<FootballMatch> getFixtures(boolean liveOnly) throws IOException {
         ArrayList<FootballMatch> fixtures = new ArrayList<FootballMatch>();
-        Document doc = Jsoup.parse(new java.net.URL(URL), 5000);
+        Document doc = Jsoup.parse(getText(this.url));
         Elements e = doc.getElementsByClass("gs-o-list-ui__item");
         String last = "";
         for (Element el : e) {
@@ -56,9 +62,11 @@ public class SportAPI {
             String awayScore = "";
             String time = "";
             if (score.size() == 1) {
-                KO = score.get(0).text();
-                FootballFixture fixture = new FootballFixture(home,away,KO);
-                fixtures.add(fixture);
+                if (!liveOnly) {
+                    KO = score.get(0).text();
+                    FootballFixture fixture = new FootballFixture(home, away, KO);
+                    fixtures.add(fixture);
+                }
             } else {
                 homeScore = score.get(0).text();
                 awayScore = score.get(1).text();
@@ -78,17 +86,57 @@ public class SportAPI {
                 }
                 FootballMatch match = null;
                 if (time.equalsIgnoreCase("HT")) {
-                    match = new HalfTimeMatch(home, away, homeScore + "-" + awayScore);
+                    if (!liveOnly)
+                        match = new HalfTimeMatch(home, away, homeScore + "-" + awayScore);
                 } else if (time.equalsIgnoreCase("FT")) {
-                    match = new FinishedMatch(home, away, homeScore + "-" + awayScore);
-                }else{
+                    if (!liveOnly)
+                        match = new FinishedMatch(home, away, homeScore + "-" + awayScore);
+                } else {
                     match = new LiveMatch(home, away, homeScore + "-" + awayScore);
                 }
-                fixtures.add(match);
+                if (match != null)
+                    fixtures.add(match);
             }
         }
-
         return fixtures;
+    }
+
+    public static String getText(String url) throws IOException {
+        URL website = new URL(url);
+        URLConnection connection = website.openConnection();
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(
+                        connection.getInputStream()));
+
+        StringBuilder response = new StringBuilder();
+        String inputLine;
+
+        while ((inputLine = in.readLine()) != null)
+            response.append(inputLine);
+
+        in.close();
+
+        return response.toString();
+    }
+
+    public void async(FixtureCallback callback, boolean liveOnly) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ArrayList<FootballMatch> fixtures = getFixtures(liveOnly);
+                    callback.callback(fixtures);
+                } catch (IOException e) {
+                    callback.error(e);
+                }
+            }
+        }).start();
+    }
+
+    public interface FixtureCallback {
+        void callback(ArrayList<FootballMatch> fixtures);
+
+        void error(IOException ex);
     }
 
 

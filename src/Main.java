@@ -8,10 +8,18 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         SportAPI api = new SportAPI();
-        ArrayList<FootballMatch> fixtures = api.getFixtures(false);
-        for(FootballMatch f : fixtures){
-            System.out.println(f);
-        }
+        api.async(new SportAPI.FixtureCallback() {
+            @Override
+            public void callback(ArrayList<FootballMatch> fixtures) {
+                for (FootballMatch f : fixtures) {
+                    System.out.println(f);
+                }
+            }
 
+            @Override
+            public void error(IOException ex) {
+                ex.printStackTrace();
+            }
+        }, false);
     }
 }
