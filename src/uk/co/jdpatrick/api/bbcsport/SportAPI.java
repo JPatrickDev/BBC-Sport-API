@@ -1,5 +1,8 @@
 package uk.co.jdpatrick.api.bbcsport;
 
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.apache.commons.logging.LogFactory;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -20,34 +23,41 @@ import java.util.logging.Logger;
 /**
  * Author: Jack
  * Date: 16/03/13
- * Last updated: 10/11/2017
+ * Last updated: 14/07/2018
  */
 public class SportAPI {
-    private String league;
-    private String url;
+    private final boolean htmlunit;
+    private final String league;
+    private final String url;
 
-    public SportAPI() {
-        this("football");
+    public SportAPI(boolean htmlunit) {
+        this("football", htmlunit);
     }
 
 
     Logger log = Logger.getLogger(SportAPI.class.getName());
 
-    public SportAPI(String league) {
+    public SportAPI(String league, boolean htmlunit) {
         this.league = league;
         if (league.equalsIgnoreCase("football")) {
             this.url = "https://www.bbc.co.uk/sport/football/scores-fixtures";
         } else {
             this.url = "https://www.bbc.co.uk/sport/football/" + league + "/scores-fixtures";
         }
-
+        this.htmlunit = htmlunit;
         log.log(Level.INFO, "New SportAPI object created, using league " + league);
         log.log(Level.INFO, this.url);
+        log.log(Level.INFO, "HTMLUnit: " + this.htmlunit);
+
+        LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
+
+        java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
+        java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
     }
 
     public ArrayList<FootballMatch> getFixtures(boolean liveOnly) throws IOException {
         ArrayList<FootballMatch> fixtures = new ArrayList<FootballMatch>();
-        Document doc = Jsoup.parse(getText(this.url));
+        Document doc = getDocument();
         Elements e = doc.getElementsByClass("gs-o-list-ui__item");
         String last = "";
         for (Element el : e) {
@@ -99,6 +109,18 @@ public class SportAPI {
             }
         }
         return fixtures;
+    }
+
+    public Document getDocument() throws IOException {
+        if (htmlunit) {
+            WebClient webClient = new WebClient();
+            HtmlPage page = webClient.getPage(this.url);
+            //Seems to be the smallest wait that reliably gives enough time for the page to have all the matches
+            webClient.waitForBackgroundJavaScript(2500);
+            return Jsoup.parse(page.asXml());
+        } else {
+            return Jsoup.parse(getText(this.url));
+        }
     }
 
     public static String getText(String url) throws IOException {

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        SportAPI api = new SportAPI();
+        SportAPI api = new SportAPI(true);
         api.async(new SportAPI.FixtureCallback() {
             @Override
             public void callback(ArrayList<FootballMatch> fixtures) {
