@@ -1,5 +1,6 @@
 BBC-Sport-API
 =============
+(Please note this project is NOT designed for commercial use. Please see https://github.com/JPatrickDev/BBC-Sport-API/issues/1 for more information)
 
 A java interface for the BBC Sport football scores. 
 Currently being re-written as the original version was from 2013. 
@@ -12,6 +13,6 @@ The boolean in the SportAPI constructor indicates if HTMLUtil should be used to 
 delay to the return of the results, not doing so can often result in not all of the scores being returned, or sometimes scores from strange leagues when results from much more high profile games
 are available if you view the scores in a browser. Seems the BBC don't actually return all of the scores in
 the original request, but insert them client side with JS. There is a .async method that allows the request to be made easily on another thread and a FixtureListener to deal with the results, 
-which should make the HTMLUtil mode much more usable. 
+which should make the HTMLUnit mode much more usable. 
 
 Please be considerate when using this library. Please try keep requests limited, once or twice a minute at most if possible.
