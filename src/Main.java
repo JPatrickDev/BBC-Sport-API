@@ -1,4 +1,4 @@
-import uk.co.jdpatrick.api.bbcsport.Models.FootballMatch;
+import uk.co.jdpatrick.api.bbcsport.Models.match.FootballMatch;
 import uk.co.jdpatrick.api.bbcsport.SportAPI;
 
 import java.io.IOException;

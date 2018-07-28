@@ -1,8 +1,4 @@
-package uk.co.jdpatrick.api.bbcsport.Models;
-
-import uk.co.jdpatrick.api.bbcsport.Event;
-
-import java.util.ArrayList;
+package uk.co.jdpatrick.api.bbcsport.Models.match;
 
 /**
  * Author: Jack
@@ -10,8 +6,8 @@ import java.util.ArrayList;
  */
 public class FinishedMatch extends LiveMatch {
 
-    public FinishedMatch(String home, String away, String score) {
-        super(home, away,score);
+    public FinishedMatch(String id,String home, String away, String score) {
+        super(id,home, away,score);
         this.state = FixtureState.FULLTIME;
     }
 

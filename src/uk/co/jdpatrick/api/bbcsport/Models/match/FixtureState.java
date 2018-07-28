@@ -1,4 +1,4 @@
-package uk.co.jdpatrick.api.bbcsport.Models;
+package uk.co.jdpatrick.api.bbcsport.Models.match;
 
 /**
  * Author: Jack

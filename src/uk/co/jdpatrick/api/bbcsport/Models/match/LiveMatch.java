@@ -1,4 +1,4 @@
-package uk.co.jdpatrick.api.bbcsport.Models;
+package uk.co.jdpatrick.api.bbcsport.Models.match;
 
 import uk.co.jdpatrick.api.bbcsport.Event;
 
@@ -11,10 +11,10 @@ import java.util.ArrayList;
 public class LiveMatch extends FootballMatch {
 
     private String score;
-    ArrayList<Event> events = new ArrayList<Event>();
+    private ArrayList<Event> events = new ArrayList<Event>();
 
-    public LiveMatch(String home, String away, String score) {
-        super(home, away, FixtureState.LIVE);
+    public LiveMatch(String id, String home, String away, String score) {
+        super(id, home, away, FixtureState.LIVE);
         this.score = score;
 
     }
@@ -35,6 +35,10 @@ public class LiveMatch extends FootballMatch {
         this.events = events;
     }
 
+
+    public void loadEvents() {
+        //TODO
+    }
 
     @Override
     public String toString() {

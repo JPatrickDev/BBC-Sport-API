@@ -1,8 +1,4 @@
-package uk.co.jdpatrick.api.bbcsport.Models;
-
-import uk.co.jdpatrick.api.bbcsport.Event;
-
-import java.util.ArrayList;
+package uk.co.jdpatrick.api.bbcsport.Models.match;
 
 /**
  * Author: Jack
@@ -12,8 +8,8 @@ public class FootballFixture extends FootballMatch {
 
     private String ko;
 
-    public FootballFixture(String home, String away, String ko) {
-        super(home, away, FixtureState.FIXTURE);
+    public FootballFixture(String id,String home, String away, String ko) {
+        super(id,home, away, FixtureState.FIXTURE);
         this.ko = ko;
     }
 

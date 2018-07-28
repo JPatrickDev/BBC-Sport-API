@@ -3,17 +3,15 @@ package uk.co.jdpatrick.api.bbcsport;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.apache.commons.logging.LogFactory;
-import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import uk.co.jdpatrick.api.bbcsport.Models.*;
+import uk.co.jdpatrick.api.bbcsport.Models.match.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -59,8 +57,15 @@ public class SportAPI {
         ArrayList<FootballMatch> fixtures = new ArrayList<FootballMatch>();
         Document doc = getDocument();
         Elements e = doc.getElementsByClass("gs-o-list-ui__item");
-        String last = "";
         for (Element el : e) {
+            String id = null;
+            try {
+                Elements aTag = el.getElementsByClass("sp-c-fixture__block-link");
+                id = aTag.get(0).attr("href").split("/")[3];
+            } catch (Exception exe) {
+            }
+
+
             Elements clubs = el.getElementsByClass("sp-c-fixture__team-name-trunc");
             Elements names = clubs.select("abbr");
             String home = names.get(0).text();
@@ -74,7 +79,7 @@ public class SportAPI {
             if (score.size() == 1) {
                 if (!liveOnly) {
                     KO = score.get(0).text();
-                    FootballFixture fixture = new FootballFixture(home, away, KO);
+                    FootballFixture fixture = new FootballFixture(id, home, away, KO);
                     fixtures.add(fixture);
                 }
             } else {
@@ -83,7 +88,6 @@ public class SportAPI {
                 Elements status = el.getElementsByClass("sp-c-fixture__status");
                 String statusString = status.get(0).getElementsByTag("abbr").text();
                 if (statusString.equalsIgnoreCase("")) {
-                    //  System.out.println("Live game");
                     Elements elmt = status.get(0).getElementsByTag("span");
                     for (Element child : elmt) {
                         if (!child.text().equals("")) {
@@ -94,15 +98,17 @@ public class SportAPI {
                 } else {
                     time = statusString;
                 }
+
+
                 FootballMatch match = null;
                 if (time.equalsIgnoreCase("HT")) {
                     if (!liveOnly)
-                        match = new HalfTimeMatch(home, away, homeScore + "-" + awayScore);
+                        match = new HalfTimeMatch(id, home, away, homeScore + "-" + awayScore);
                 } else if (time.equalsIgnoreCase("FT")) {
                     if (!liveOnly)
-                        match = new FinishedMatch(home, away, homeScore + "-" + awayScore);
+                        match = new FinishedMatch(id, home, away, homeScore + "-" + awayScore);
                 } else {
-                    match = new LiveMatch(home, away, homeScore + "-" + awayScore);
+                    match = new LiveMatch(id, home, away, homeScore + "-" + awayScore);
                 }
                 if (match != null)
                     fixtures.add(match);
@@ -116,7 +122,7 @@ public class SportAPI {
             WebClient webClient = new WebClient();
             HtmlPage page = webClient.getPage(this.url);
             //Seems to be the smallest wait that reliably gives enough time for the page to have all the matches
-            webClient.waitForBackgroundJavaScript(2500);
+            webClient.waitForBackgroundJavaScript(1500);
             return Jsoup.parse(page.asXml());
         } else {
             return Jsoup.parse(getText(this.url));
