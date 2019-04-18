@@ -98,7 +98,9 @@ public class SportAPI {
                 } else {
                     time = statusString;
                 }
-
+                if(time.equalsIgnoreCase("Agg")){
+                    time = status.get(1).getElementsByTag("abbr").text();
+                }
 
                 FootballMatch match = null;
                 if (time.equalsIgnoreCase("HT")) {
@@ -108,6 +110,9 @@ public class SportAPI {
                     if (!liveOnly)
                         match = new FinishedMatch(id, home, away, homeScore + "-" + awayScore);
                 } else {
+                    System.out.println("===========");
+                    System.out.println(status);
+                    System.out.println("===========");
                     match = new LiveMatch(id, home, away, homeScore + "-" + awayScore);
                 }
                 if (match != null)
