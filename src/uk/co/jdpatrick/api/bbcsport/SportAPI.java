@@ -110,9 +110,6 @@ public class SportAPI {
                     if (!liveOnly)
                         match = new FinishedMatch(id, home, away, homeScore + "-" + awayScore);
                 } else {
-                    System.out.println("===========");
-                    System.out.println(status);
-                    System.out.println("===========");
                     match = new LiveMatch(id, home, away, homeScore + "-" + awayScore);
                 }
                 if (match != null)
