@@ -26,6 +26,11 @@ public abstract class FootballMatch {
         return state;
     }
 
+
+    public String getId() {
+        return id;
+    }
+
     @Override
     public String toString() {
         return "FootballMatch{" +

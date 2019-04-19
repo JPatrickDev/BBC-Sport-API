@@ -1,4 +1,5 @@
 import uk.co.jdpatrick.api.bbcsport.Models.match.FootballMatch;
+import uk.co.jdpatrick.api.bbcsport.Models.match.LiveMatch;
 import uk.co.jdpatrick.api.bbcsport.SportAPI;
 
 import java.io.IOException;
@@ -12,6 +13,14 @@ public class Main {
             @Override
             public void callback(ArrayList<FootballMatch> fixtures) {
                 for (FootballMatch f : fixtures) {
+                    if(f instanceof LiveMatch){
+                        LiveMatch match = (LiveMatch) f;
+                        try {
+                            match.loadEvents();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     System.out.println(f);
                 }
             }
