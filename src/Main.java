@@ -15,11 +15,11 @@ public class Main {
                 for (FootballMatch f : fixtures) {
                     if(f instanceof LiveMatch){
                         LiveMatch match = (LiveMatch) f;
-                        try {
+                        /*try {
                             match.loadEvents();
                         } catch (IOException e) {
                             e.printStackTrace();
-                        }
+                        }*/
                     }
                     System.out.println(f);
                 }

@@ -124,7 +124,7 @@ public class SportAPI {
             WebClient webClient = new WebClient();
             HtmlPage page = webClient.getPage(this.url);
             //Seems to be the smallest wait that reliably gives enough time for the page to have all the matches
-            webClient.waitForBackgroundJavaScript(1500);
+            webClient.waitForBackgroundJavaScript(2500);
             return Jsoup.parse(page.asXml());
         } else {
             return Jsoup.parse(getText(this.url));
